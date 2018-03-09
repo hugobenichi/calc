@@ -20,35 +20,49 @@ fn parse(atom: &str) -> Atom {
   }
 }
 
-fn push_atom(s: &mut [Atom], c: &mut usize, a: Atom) {
+fn push_num(s: &mut [i64], c: &mut usize, a: i64) {
   *c -= 1;
   s[*c] = a;
 }
 
-fn pop_atom(s: &mut [Atom], c: &mut usize) -> Atom {
+fn pop_num(s: &mut [i64], c: &mut usize) -> i64 {
   let a = s[*c];
   *c += 1;
   return a;
 }
 
-fn reduce_stack(s: &mut [Atom], c: &mut usize) {
-  s[0] = pop_atom(s, c);
+fn reduce(s: &mut [i64], c: &mut usize, a: Atom) {
+  match a {
+    Atom::Void    => {},
+    Atom::Num(x)  => push_num(s, c, x),
+    Atom::Plus    => {
+      let y = pop_num(s, c);
+      let x = pop_num(s, c);
+      println!("after double pop, just before push, stack = {}:{:?}", c, s);
+      let z = x + y;
+      push_num(s, c, z);
+    }
+    Atom::Minus   => {
+      let y = pop_num(s, c);
+      let x = pop_num(s, c);
+      let z = x - y;
+      push_num(s, c, z);
+    }
+  }
 }
 
 fn main() {
 
-  let mut stack : [Atom; 10] = [Atom::Void; 10];
+  let mut stack : [i64; 10] = [0; 10];
   let mut cursor : usize = 10;
 
   for a in env::args() {
-    push_atom(&mut stack, &mut cursor, parse(&a));
+    reduce(&mut stack, &mut cursor, parse(&a));
 
     println!("stack = {}:{:?}", cursor, stack);
   }
 
-  reduce_stack(&mut stack, &mut cursor);
-
-  for a in &stack[cursor-1..] {
-    println!("{:?}", a);
+  for a in &stack[cursor..] {
+    println!("{}", a);
   }
 }
