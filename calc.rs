@@ -53,9 +53,10 @@ fn main() {
 
   let mut stack = Vec::new();
 
-  for a in env::args() {
-    // TODO: split 'a' on spaces
-    reduce(&mut stack, parse(&a));
+  for arg in env::args() {
+    for p in arg.split_whitespace() {
+      reduce(&mut stack, parse(&p));
+    }
   }
 
   println!("stack = {:?}", stack);
